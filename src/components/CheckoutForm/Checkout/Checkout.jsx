@@ -45,9 +45,9 @@ function Checkout({ cart, order, onCaptureCheckout, error, onResetError }) {
     const next = (data) => {
         setShippingData(data);
         nextStep();
-    }
+    }    
 
-    const Form = () => (activeStep === 0) ? <AddressForm 
+    const Form = () => (activeStep === 0) ? <AddressForm                                                 
                                                 checkoutToken={checkoutToken}
                                                 next={next} 
                                             /> : <PaymentForm 
