@@ -1,11 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+// import {commerce} from '../../lib/commerce'
 import { Typography, List, ListItem, ListItemText } from '@material-ui/core';
 
-function Review({ checkoutToken }) {
-    console.log(checkoutToken.live)
+let data = {};
+
+function Review({ checkoutToken, shippingInfo }) {
+    // const [render, setRender] = useState(false);    
     const paddingStyle = {
         padding: '10px 0'
-    }
+    };    
+    console.log(checkoutToken.live)
+
+    // const getShippingOption = async () => {
+    //     try {
+    //         data = await commerce.checkout.checkShippingOption(checkoutToken.id, {
+    //             shipping_option_id: shippingData.shippingOption,
+    //             country: shippingData.shippingCountry,
+    //             region: shippingData.shippingSubdivision
+    //         });            
+    //         setRender(prevState => !prevState);
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     getShippingOption();
+    // }, []);
+
+    // if (!Object.keys(shippingInfo).length) return null;
 
     return (
         <>
@@ -18,13 +41,13 @@ function Review({ checkoutToken }) {
                     </ListItem>
                 ))}
                 <ListItem style={paddingStyle}>
-                        <ListItemText primary={`Shipping option:`} secondary={`${checkoutToken.live.shipping.available_options[0].description}`} />
-                        <Typography variant='body2'>{checkoutToken.live.shipping.available_options[0].price.formatted_with_symbol}</Typography>
+                        <ListItemText primary={`Shipping option:`} secondary={`${shippingInfo.description}`} />
+                        <Typography variant='body2'>{shippingInfo.price.formatted_with_symbol}</Typography>
                 </ListItem>
                 <ListItem style={paddingStyle}>
                     <ListItemText primary='Total' />
                     <Typography variant='subtitle1' style={{fontWeight: 700}}>
-                        {checkoutToken.live.subtotal.formatted_with_symbol}
+                        ${(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
                     </Typography>
                 </ListItem>
             </List>
