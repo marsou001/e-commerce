@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Button, Divider } from '@material-ui/core';
+import { Typography, Button, Divider, TextInput } from '@material-ui/core';
 import {commerce} from '../../lib/commerce';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -7,7 +7,7 @@ import Review from './Review';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
-function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCaptureCheckout, refresh }) {       
+function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCaptureCheckout }) {       
     const [shippingInfo, setShippingInfo] = useState({});
 
     const Payment = () => {
@@ -42,16 +42,15 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
                     },
                     fulfillment: {
                         shipping_method: shippingData.shippingOption
-                    },
-                    payment: {
-                        gateway: 'stripe',
-                        stripe: {
-                            payment_method_id: paymentMethod.id
-                        }
-                    }
+                    },                    
                 }            
                 
-                onCaptureCheckout(checkoutToken.id, orderData);
+                onCaptureCheckout(checkoutToken.id, orderData, {
+                    gateway: 'stripe',
+                    stripe: {
+                        payment_method_id: paymentMethod.id
+                    }
+                });
                 nextStep();
     
             } catch (error) {
@@ -67,13 +66,34 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <Button variant='outlined' onClick={backStep}>Back</Button>
                     <Button type='submit' variant='contained' disabled={!stripe} color='primary'>
-                        {/* Pay {checkoutToken.live.subtotal.formatted_with_symbol} */}
                         Pay ${(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
                     </Button>
                 </div>
             </form> 
         )
     }
+
+    const handlePayment = async (e) => {
+        try {
+            const payplayAuth = await commerce.checkout.capture(checkoutToken.id, orderData, {
+                gateway: 'paypal',
+                paypal: {
+                    action: 'authorize'
+                }
+            })
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    const Paypal = () => (
+        <>
+            <form onSubmit={handlePayment}>
+                <TextInput name='email' label='email' />
+                <Button variant='contained' color='primary'>Pay with Paypal</Button>
+            </form>
+        </>
+    )
 
     useEffect(() => {
         (async () => {
@@ -97,6 +117,7 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
             <Review checkoutToken={checkoutToken} shippingData={shippingData} shippingInfo={shippingInfo} />
             <Divider />
             <Typography variant='h6' style={{margin: '20px 0'}} gutterBottom>Payment method</Typography>
+            <Paypal />
             <Elements stripe={stripePromise}>
                 <Payment />
             </Elements>

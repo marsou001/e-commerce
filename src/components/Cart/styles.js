@@ -26,4 +26,11 @@ export default makeStyles((theme) => ({
         width: '100%',
         justifyContent: 'space-between',
     },
+    buttons: {
+        [theme.breakpoints.down('xs')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end'
+        }
+    }
 }));

@@ -13,9 +13,9 @@ function Cart({ cart, onUpdateCartQuantity, onRemoveFromCart, onEmptyCart }) {
 
     const FilledCart = () => (
         <>
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
                 {cart.line_items.map((item => (
-                    <Grid item key={item.id} xs={12} sm={4}>
+                    <Grid item key={item.id} xs={12} sm={6} md={4}>
                         <CartItem
                             item={item}
                             onUpdateCartQuantity={onUpdateCartQuantity} 
@@ -28,7 +28,7 @@ function Cart({ cart, onUpdateCartQuantity, onRemoveFromCart, onEmptyCart }) {
                 <Typography variant='h4'>
                     Subtotal: {cart.subtotal.formatted_with_symbol}
                 </Typography>
-                <div>
+                <div className={classes.buttons}>
                     <Button className={classes.emptyButton} size='large' type='button' variant='contained' color='secondary' onClick={onEmptyCart}>Empty Cart</Button>
                     <Button component={Link} to='/checkout' className={classes.checkoutButton} size='large' type='button' variant='contained' color='primary'>Checkout</Button>
                 </div>

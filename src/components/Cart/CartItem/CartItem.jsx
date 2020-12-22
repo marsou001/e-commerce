@@ -10,7 +10,7 @@ function CartItem({ item, onUpdateCartQuantity, onRemoveFromCart }) {
             <CardMedia image={item.media.source} alt={item.name} className={classes.media} />
             <CardContent className={classes.cardContent}>
                 <Typography variant='h4'>{item.name}</Typography>    
-                <Typography variant='h5'>{item.line_total.formatted_with_symbol}</Typography>    
+                <Typography variant='h5' className={classes.itemPrice}>{item.line_total.formatted_with_symbol}</Typography>    
             </CardContent>
             <CardActions className={classes.cardActions}>
                 <div className={classes.buttons}>
