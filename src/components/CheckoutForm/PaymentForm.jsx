@@ -1,99 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Button, Divider, TextInput } from '@material-ui/core';
-import {commerce} from '../../lib/commerce';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { Typography, Divider } from '@material-ui/core';
+import { commerce } from '../../lib/commerce';
 import Review from './Review';
+import ReactPaypal from './ReactPaypal/ReactPaypal';
+// import ReactStripe from './ReactStripe/ReactStripe';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
-
-function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCaptureCheckout }) {       
-    const [shippingInfo, setShippingInfo] = useState({});
-
-    const Payment = () => {
-        const stripe = useStripe();
-        const elements = useElements();
-
-        const handleSubmit = async (event, elements, stripe) => {
-            event.preventDefault();
-    
-            if (!elements || !stripe) return;
-    
-            const cardElement = elements.getElement(CardElement);
-    
-            try {
-                const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
-                if (error) throw error;            
-    
-                const orderData = {
-                    line_items: checkoutToken.live.line_items,
-                    customer: {
-                        firstname: shippingData.firstName,
-                        lastname: shippingData.lastName,
-                        email: shippingData.email
-                    },
-                    shipping: {
-                        name: 'Primary',
-                        street: shippingData.address1,
-                        town_city: shippingData.city,
-                        county_state: shippingData.shippingSubdivision,
-                        postal_zip_code: shippingData.zip,
-                        country: shippingData.shippingCountry
-                    },
-                    fulfillment: {
-                        shipping_method: shippingData.shippingOption
-                    },                    
-                }            
-                
-                onCaptureCheckout(checkoutToken.id, orderData, {
-                    gateway: 'stripe',
-                    stripe: {
-                        payment_method_id: paymentMethod.id
-                    }
-                });
-                nextStep();
-    
-            } catch (error) {
-                console.log(error);
-            }
-    
-        }
-
-        return (
-            <form onSubmit={(e) => handleSubmit(e, elements, stripe)}>
-                <CardElement />
-                <br /> <br />
-                <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <Button variant='outlined' onClick={backStep}>Back</Button>
-                    <Button type='submit' variant='contained' disabled={!stripe} color='primary'>
-                        Pay ${(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
-                    </Button>
-                </div>
-            </form> 
-        )
-    }
-
-    const handlePayment = async (e) => {
-        try {
-            const payplayAuth = await commerce.checkout.capture(checkoutToken.id, orderData, {
-                gateway: 'paypal',
-                paypal: {
-                    action: 'authorize'
-                }
-            })
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    const Paypal = () => (
-        <>
-            <form onSubmit={handlePayment}>
-                <TextInput name='email' label='email' />
-                <Button variant='contained' color='primary'>Pay with Paypal</Button>
-            </form>
-        </>
-    )
+function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeCaptureCheckout, onPaypalCaptureCheckout, onSetErrorMessage, onSetOrder }) {       
+    const [shippingInfo, setShippingInfo] = useState({});       
 
     useEffect(() => {
         (async () => {
@@ -117,10 +30,25 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
             <Review checkoutToken={checkoutToken} shippingData={shippingData} shippingInfo={shippingInfo} />
             <Divider />
             <Typography variant='h6' style={{margin: '20px 0'}} gutterBottom>Payment method</Typography>
-            <Paypal />
-            <Elements stripe={stripePromise}>
-                <Payment />
-            </Elements>
+            
+            <ReactPaypal 
+                checkoutToken={checkoutToken}
+                shippingData={shippingData}
+                amount={(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()} 
+                nextStep={nextStep}
+                backStep={backStep}
+                onPaypalCaptureCheckout={onPaypalCaptureCheckout}
+                onSetErrorMessage={onSetErrorMessage}
+                onSetOrder={onSetOrder}
+            />
+            {/* <ReactStripe
+                shippingData={shippingData}
+                shippingInfo={shippingInfo}
+                checkoutToken={checkoutToken}
+                nextStep={nextStep}
+                backStep={backStep}
+                onStripeCaptureCheckout={onStripeCaptureCheckout} 
+            />             */}
         </>
     )
 }

@@ -6,7 +6,7 @@ import { commerce } from '../../../lib/commerce';
 import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
 
-function Checkout({ cart, order, onCaptureCheckout, error, onResetError }) {
+function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckout, error, onResetError, onSetErrorMessage, onSetOrder }) {
     const [activeStep, setActiveStep] = useState(0);
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [shippingData, setShippingData] = useState({});
@@ -55,7 +55,10 @@ function Checkout({ cart, order, onCaptureCheckout, error, onResetError }) {
                                                      checkoutToken={checkoutToken}
                                                      nextStep={nextStep} 
                                                      backStep={backStep} 
-                                                     onCaptureCheckout={onCaptureCheckout} 
+                                                     onStripeCaptureCheckout={onStripeCaptureCheckout}
+                                                     onPaypalCaptureCheckout={onPaypalCaptureCheckout} 
+                                                     onSetErrorMessage={onSetErrorMessage}
+                                                     onSetOrder={onSetOrder}
                                                  />;
 
     useEffect(() => {
