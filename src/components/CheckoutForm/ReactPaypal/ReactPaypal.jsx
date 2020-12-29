@@ -14,7 +14,6 @@ function ReactPaypal({ checkoutToken, shippingData, amount, nextStep, backStep, 
                     }
                 }
             });
-            console.log(orderDetails)
             renderPaypalButton(orderDetails, paypalAuth);
         } catch (e) {            
             console.log(e)
@@ -42,14 +41,10 @@ function ReactPaypal({ checkoutToken, shippingData, amount, nextStep, backStep, 
                     });
                 },                                
                 onCancel: function(data, actions) {
-                    console.log(data, 'background-color: #f00');
-                    console.log(actions, 'background-color: #f00');
+                    console.log('oops')                    
                 },
-                onApprove: async (data, actions) => {
-                    console.log(data, 'background-color: #0f0');
-                    console.log(actions, 'background-color: #0f0');
-                    const order = await actions.order.capture();
-                    console.log(order);
+                onApprove: async (data, actions) => {                    
+                    const order = await actions.order.capture();                    
                     captureOrder(orderData, order, paypalAuth)                   
                 },
                 onError: (err) => {                  
@@ -73,15 +68,12 @@ function ReactPaypal({ checkoutToken, shippingData, amount, nextStep, backStep, 
                         payer_id: data.payer.payer_id
                     }
                 }
-            })
-            console.log(order);
+            })            
             onSetOrder(orderDetails);
         } catch (e) {
             onSetErrorMessage(e.data.error.message);
             console.log(e);
-        }
-        console.log('step')
-        nextStep();
+        }        nextStep();
     }
 
     const handleSubmit = (e) => {
