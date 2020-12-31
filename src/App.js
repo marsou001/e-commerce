@@ -65,6 +65,10 @@ function App() {
     }
 
     const handleStripeCaptureCheckout = async (checkoutTokenId, newOrder, paymentGateway) => {
+        console.log({
+            ...newOrder, 
+            payment: { ...paymentGateway }
+        })
         try {            
             const incomingOrder = await commerce.checkout.capture(checkoutTokenId, {
                 ...newOrder, 
@@ -79,95 +83,99 @@ function App() {
         }
     }
     
-    // const handlePaypalCaptureCheckout = async (checkoutTokenId, newOrder, paymentGateway) => {
-    //     const getPaypalPaymentId = async (orderDetails) => {
-    //         try {
-    //             const paypalAuth = await commerce.checkout.capture(checkoutToken.id, {
-    //                 ...orderDetails,
-    //                 payment: {
-    //                     gateway: 'paypal',
-    //                     paypal: {
-    //                         action: 'authorize'
-    //                     }
-    //                 }
-    //             });
+    const handlePaypalCaptureCheckout = async (checkoutTokenId, newOrder, amount, moveToNextStep) => {
+        const getPaypalPaymentId = async (orderDetails) => {
+            try {
+                const paypalAuth = await commerce.checkout.capture(checkoutTokenId, {
+                    ...orderDetails,
+                    payment: {
+                        gateway: 'paypal',
+                        paypal: {
+                            action: 'authorize'
+                        }
+                    }
+                });
+                renderPaypalButton(orderDetails, paypalAuth);
+            } catch (e) {   
+                setErrorMessage(e.data.error.message);         
+                console.log(e)
+            }               
+        } 
     
-    //             renderPaypalButton(paypalAuth);
-    //         } catch (e) {            
-    //             console.log(e)
-    //         }               
-    //     } 
+        const renderPaypalButton = (orderData, paypalAuth) => {
+            console.log(window.paypal);
+            try {
+                window.paypal.Buttons({
+                    env: 'sandbox',
+                    commit: true,
+                    createOrder: (data, actions) => {
+                        return actions.order.create({
+                            intent: "CAPTURE",
+                            purchase_units: [
+                                {
+                                    description: "Your description",
+                                    amount: {
+                                        currency_code: "USD",
+                                        value: amount,
+                                    },
+                                },
+                            ],
+                        });
+                    },                                
+                    onCancel: function(data, actions) {
+                        console.log('oops')                    
+                    },
+                    onApprove: async (data, actions) => {                    
+                        const order = await actions.order.capture();                    
+                        captureOrder(orderData, order, paypalAuth)                   
+                    },
+                    onError: (err) => {                  
+                        console.error(err);
+                    },
+                }).render('#paypal-button');
+            } catch (e) {
+                setErrorMessage(e.data.error.message);
+                console.log(e);
+            }
+        }        
     
-    //     const  renderPaypalButton = (orderData, paypalAuth) => {
-    //         window.paypal.Button.render({
-    //             env: 'sandbox',
-    //             commit: true,
-    //             payment: function() {
-    //                 return paypalAuth.payment_id
-    //             },
-    //             onAuthorize: function(data, actions) {
-    //                 console.log('%cdata: ' + data, 'background-color: #0f0');
-    //                 console.log('%cactions: ' + actions, 'background-color: #0f0');
-    //                 captureOrder(orderData, data)
-    //             },
-    //             onCancel: function(data, actions) {
-    //                 console.log('%cdata: ' + data, 'background-color: #f00');
-    //                 console.log('%cactions: ' + actions, 'background-color: #f00');
-    //             }           
-    //         })
-    //     }        
-    
-    //     const captureOrder = async (orderDetails, data) => {
-    //         try {
-    //             const order = commerce.checkout.capture(checkoutToken.id, {
-    //                 ...orderDetails,
-    //                 payment: {
-    //                     gateway: 'paypal',
-    //                     paypal: {
-    //                         action: 'authorize',
-    //                         payment_id: data.payment_id,
-    //                         payer_id: data.payer_id
-    //                     }
-    //                 }
-    //             })
-    //             console.log(order);
-    //         } catch (e) {
-    //             console.log(e);
-    //         }
-    //     }
-
-    //     try {            
-    //         const incomingOrder = await commerce.checkout.capture(checkoutTokenId, {
-    //             ...newOrder, 
-    //             payment: { ...paymentGateway }
-    //         });
-    //         setOrder(incomingOrder);            
-
-    //         refreshCart();
-    //     } catch (error) {   
-    //         console.log(error)         
-    //         setErrorMessage(error.data.error.message);
-    //     }
-    // }
+        const captureOrder = async (orderDetails, data, auth) => {
+            try {            
+                await commerce.checkout.capture(checkoutTokenId, {
+                    ...orderDetails,
+                    payment: {
+                        gateway: 'paypal',
+                        paypal: {
+                            action: 'capture',                        
+                            payment_id: auth.payment_id,
+                            payer_id: data.payer.payer_id
+                        }
+                    }
+                })            
+                setOrder(orderDetails);                
+            } catch (e) {
+                setErrorMessage(e.data.error.message);
+                console.log(e);
+            }        
+            moveToNextStep();
+        }
+        getPaypalPaymentId(newOrder);
+    }
     
     
 
     const handleResetError = () => {
         setErrorMessage('');
-    }
+    }    
 
-    const handleSetErrorMessage = (string) => {
-        setErrorMessage(string);
+    const handleDeleteCart = async () => {
+        try {
+            const response = await commerce.cart.delete();
+            console.log(response);
+        } catch (e) {
+            console.log(e)
+        }
     }
-
-    // const handleDeleteCart = async () => {
-    //     try {
-    //         const response = await commerce.cart.delete();
-    //         console.log(response);
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    // }
 
     useEffect(() => {
         fetchProducts();
@@ -196,11 +204,9 @@ function App() {
                             cart={cart} 
                             order={order}
                             onStripeCaptureCheckout={handleStripeCaptureCheckout}
-                            // onPaypalCaptureCheckout={handlePaypalCaptureCheckout}
-                            error={errorMessage}
-                            onResetError={handleResetError}
-                            onSetErrorMessage={handleSetErrorMessage}
-                            onSetOrder={setOrder}
+                            onPaypalCaptureCheckout={handlePaypalCaptureCheckout}
+                            error={errorMessage}      
+                            onResetError={handleResetError}                      
                         />
                     </Route>
                 </Switch>

@@ -6,7 +6,7 @@ import { commerce } from '../../../lib/commerce';
 import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
 
-function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckout, error, onResetError, onSetErrorMessage, onSetOrder }) {
+function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckout, error, onResetError }) {
     const [activeStep, setActiveStep] = useState(0);
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [shippingData, setShippingData] = useState({});
@@ -56,9 +56,7 @@ function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckou
                                                      nextStep={nextStep} 
                                                      backStep={backStep} 
                                                      onStripeCaptureCheckout={onStripeCaptureCheckout}
-                                                     onPaypalCaptureCheckout={onPaypalCaptureCheckout} 
-                                                     onSetErrorMessage={onSetErrorMessage}
-                                                     onSetOrder={onSetOrder}
+                                                     onPaypalCaptureCheckout={onPaypalCaptureCheckout}                                                      
                                                  />;
 
     useEffect(() => {
@@ -72,7 +70,6 @@ function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckou
         }
 
         generateToken();
-    // }, [cart.id]);
     }, []);
 
     return (        

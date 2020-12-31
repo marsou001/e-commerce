@@ -5,7 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
-function ReactStripe({ shippingData, shippingInfo, checkoutToken, nextStep, backStep, onStripeCaptureCheckout }) {           
+function ReactStripe({ shippingData, amount, checkoutToken, nextStep, backStep, onStripeCaptureCheckout }) {           
     const Payment = () => {
         const stripe = useStripe();
         const elements = useElements();
@@ -64,7 +64,7 @@ function ReactStripe({ shippingData, shippingInfo, checkoutToken, nextStep, back
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <Button variant='outlined' onClick={backStep}>Back</Button>
                     <Button type='submit' variant='contained' disabled={!stripe} color='primary'>
-                        Pay ${(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
+                        Pay ${amount}
                     </Button>
                 </div>
             </form> 
