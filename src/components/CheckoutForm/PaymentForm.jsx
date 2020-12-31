@@ -8,36 +8,60 @@ import ReactStripe from './ReactStripe/ReactStripe';
 
 function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeCaptureCheckout, onPaypalCaptureCheckout }) {       
     const [shippingInfo, setShippingInfo] = useState({});       
-    const [option, setOption] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
 
     const useStyles = makeStyles((theme) => ({
-        formControl: {
-            margin: theme.spacing(1),
+        formControl: {      
+            margin: theme.spacing(1),      
             minWidth: 150
         }
     }));
 
-    const classes = useStyles();
+    const classes = useStyles();    
 
-    const PaymentMethod = () => {
-        if (option === 'paypal') {
-            return <ReactPaypal 
-                shippingData={shippingData}
-                checkoutToken={checkoutToken}                
-                amount={(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
-                nextStep={nextStep}
-                backStep={backStep}
-                onPaypalCaptureCheckout={onPaypalCaptureCheckout}                
-            />
-        } else if (option === 'bank card') {
-            return <ReactStripe              
-                shippingData={shippingData}  
-                checkoutToken={checkoutToken}                
-                amount={(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
-                nextStep={nextStep}
-                backStep={backStep}
-                onStripeCaptureCheckout={onStripeCaptureCheckout} 
-            />
+    const withFunctions = (WrappedComponent) => {
+        function WithFunctions(props) {
+
+            const orderData = {
+                line_items: checkoutToken.live.line_items,
+                customer: {
+                    firstname: shippingData.firstName,
+                    lastname: shippingData.lastName,
+                    email: shippingData.email
+                },
+                shipping: {
+                    name: 'Primary',
+                    street: shippingData.address1,
+                    town_city: shippingData.city,
+                    county_state: shippingData.shippingSubdivision,
+                    postal_zip_code: shippingData.zip,
+                    country: shippingData.shippingCountry
+                },
+                fulfillment: {
+                    shipping_method: shippingData.shippingOption
+                },                    
+            }
+
+            return <WrappedComponent 
+                       orderData={orderData}
+                       checkoutToken={checkoutToken}                
+                       amount={(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
+                       nextStep={nextStep}
+                       backStep={backStep} 
+                       {...props}
+                   />
+        }
+        return WithFunctions;
+    }
+
+    const EnhancedPaypal = withFunctions(ReactPaypal); 
+    const EnhancedStripe = withFunctions(ReactStripe);
+
+    const PaymentMethods = () => {
+        if (paymentMethod === 'paypal') {
+            return <EnhancedPaypal onPaypalCaptureCheckout={onPaypalCaptureCheckout} />;            
+        } else if (paymentMethod === 'bank card') {
+            return <EnhancedStripe onStripeCaptureCheckout={onStripeCaptureCheckout} />;
         }
     }
 
@@ -62,10 +86,10 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeC
         <>
             <Review checkoutToken={checkoutToken} shippingData={shippingData} shippingInfo={shippingInfo} />
             <Divider />
-            <Typography variant='h6' style={{margin: '20px 0'}} gutterBottom>Choose a payment method</Typography>            
+            <Typography variant='h6' style={{marginTop: 20}}>Choose a payment method</Typography>            
             <FormControl className={classes.formControl}>
                 <InputLabel id='payment method'>Payment method</InputLabel>
-                <Select labelId='payment method' id='payment method' onChange={(e) => setOption(e.target.value)}>
+                <Select labelId='payment method' id='payment method' onChange={(e) => setPaymentMethod(e.target.value)}>
                     <MenuItem value='paypal'>Paypal</MenuItem>
                     <MenuItem value='bank card'>Bank Card</MenuItem>
                 </Select>
@@ -74,7 +98,7 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeC
             <br /><br />
             <br />
 
-            {option ? <PaymentMethod /> : ''}            
+            {paymentMethod ? <PaymentMethods /> : ''}            
         </>
     )
 }

@@ -64,11 +64,7 @@ function App() {
         setCart(newCart);
     }
 
-    const handleStripeCaptureCheckout = async (checkoutTokenId, newOrder, paymentGateway) => {
-        console.log({
-            ...newOrder, 
-            payment: { ...paymentGateway }
-        })
+    const handleStripeCaptureCheckout = async (checkoutTokenId, newOrder, paymentGateway) => {        
         try {            
             const incomingOrder = await commerce.checkout.capture(checkoutTokenId, {
                 ...newOrder, 
@@ -78,8 +74,9 @@ function App() {
 
             refreshCart();
         } catch (error) {   
-            console.log(error)         
-            setErrorMessage(error.data.error.message);
+            if (error.data.error.type === 'requires_verification') throw error;         
+            console.log(error);
+            setErrorMessage(error.data.error.message);                               
         }
     }
     

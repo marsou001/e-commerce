@@ -2,10 +2,11 @@ import React from 'react';
 import { Button } from '@material-ui/core';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { AirlineSeatReclineExtraTwoTone } from '@material-ui/icons';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
-function ReactStripe({ shippingData, amount, checkoutToken, nextStep, backStep, onStripeCaptureCheckout }) {           
+function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep, onStripeCaptureCheckout }) {           
     const Payment = () => {
         const stripe = useStripe();
         const elements = useElements();
@@ -19,42 +20,45 @@ function ReactStripe({ shippingData, amount, checkoutToken, nextStep, backStep, 
     
             try {
                 const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
-                if (error) throw error;            
-    
-                const orderData = {
-                    line_items: checkoutToken.live.line_items,
-                    customer: {
-                        firstname: shippingData.firstName,
-                        lastname: shippingData.lastName,
-                        email: shippingData.email
-                    },
-                    shipping: {
-                        name: 'Primary',
-                        street: shippingData.address1,
-                        town_city: shippingData.city,
-                        county_state: shippingData.shippingSubdivision,
-                        postal_zip_code: shippingData.zip,
-                        country: shippingData.shippingCountry
-                    },
-                    fulfillment: {
-                        shipping_method: shippingData.shippingOption
-                    },                    
-                }            
-
-                console.log(orderData);
+                if (error) throw error;                                                   
                 
-                onStripeCaptureCheckout(checkoutToken.id, orderData, {
-                    gateway: 'stripe',
-                    stripe: {
+                // try {            
+                    onStripeCaptureCheckout(checkoutToken.id, orderData, {
+                        gateway: 'stripe',
                         payment_method_id: paymentMethod.id
-                    }
-                });
-                nextStep();
-    
+                    });             
+                    // if (response?.data?.error?.type !== 'requires_verification') {
+                        console.log('jjj');
+                        nextStep();
+                        return;
+                    // };
+                                                        
+                // } catch (response) {   
+                    // try {                
+                    //     console.log('hhh');
+                    //     const { error, paymentIntent } = await stripe.handleCardAction(response.data.error.param);
+        
+                    //     if (error) throw error;                    
+        
+                    //     try {
+                    //         onStripeCaptureCheckout(checkoutToken.id, orderData, {
+                    //             gateway: 'stripe',
+                    //             stripe: {
+                    //                 payment_intent_id: paymentIntent.id
+                    //             }
+                    //         });
+        
+                    //         nextStep();
+                    //     } catch (error) {
+                    //         console.log(error);                            
+                    //     }
+                    // } catch (error) {
+                    //     console.log(error);                
+                    // }               
+                // }
             } catch (error) {
-                console.log(error);
-            }
-    
+                console.log(error)
+            }                                
         }
 
         return (
