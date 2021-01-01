@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Context } from '../../../App';
 import { Link, useHistory } from 'react-router-dom';
 import { Paper, Stepper, Step, StepLabel, Typography, CircularProgress, Divider, Button, CssBaseline } from '@material-ui/core';
 import useStyles from './styles';
@@ -6,12 +7,14 @@ import { commerce } from '../../../lib/commerce';
 import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
 
-function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckout, error, onResetError }) {
+function Checkout({ cart, onPaypalCaptureCheckout }) {
     const [activeStep, setActiveStep] = useState(0);
     const [checkoutToken, setCheckoutToken] = useState(null);
-    const [shippingData, setShippingData] = useState({});
+    const [shippingData, setShippingData] = useState({});    
     const classes = useStyles();
-    const history = useHistory();
+    const history = useHistory();    
+
+    const { order, errorMessage, setErrorMessage } = useContext(Context);
 
     const steps = ['Shipping Address', 'Payment Details'];
 
@@ -21,7 +24,7 @@ function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckou
             <Divider className={classes.divider} />
             <Typography variant='subtitle2'>Order ref: {order.customer_reference}</Typography>
             <br />
-            <Button component={Link} to='/' variant='outlined' type='button' onClick={onResetError}>Back to home</Button>
+            <Button component={Link} to='/' variant='outlined' type='button' onClick={() => setErrorMessage('')}>Back to home</Button>
         </>
     ) : (
         <div className={classes.spinner}>
@@ -29,12 +32,12 @@ function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckou
         </div>
     );
 
-    if (error) {
+    if (errorMessage) {
         Confirmation = () => (
             <>
-                <Typography variant='h5'>Error {error}</Typography>
+                <Typography variant='h5'>Error {errorMessage}</Typography>
                 <br />
-                <Button component={Link} to='/' variant='outlined' type='button' onClick={onResetError}>Back to home</Button>
+                <Button component={Link} to='/' variant='outlined' type='button' onClick={() => setErrorMessage('')}>Back to home</Button>
             </>
         ); 
     }     
@@ -45,19 +48,20 @@ function Checkout({ cart, order, onStripeCaptureCheckout, onPaypalCaptureCheckou
     const next = (data) => {
         setShippingData(data);
         nextStep();
-    }    
+    }        
 
     const Form = () => (activeStep === 0) ? <AddressForm                                                 
                                                 checkoutToken={checkoutToken}
                                                 next={next} 
-                                            /> : <PaymentForm 
-                                                     shippingData={shippingData} 
-                                                     checkoutToken={checkoutToken}
-                                                     nextStep={nextStep} 
-                                                     backStep={backStep} 
-                                                     onStripeCaptureCheckout={onStripeCaptureCheckout}
-                                                     onPaypalCaptureCheckout={onPaypalCaptureCheckout}                                                      
-                                                 />;
+                                            /> : (                                                
+                                                <PaymentForm 
+                                                    shippingData={shippingData} 
+                                                    checkoutToken={checkoutToken}
+                                                    nextStep={nextStep} 
+                                                    backStep={backStep}                                                     
+                                                    onPaypalCaptureCheckout={onPaypalCaptureCheckout}                                                      
+                                                />                                                
+                                            )
 
     useEffect(() => {
         const generateToken = async () => {

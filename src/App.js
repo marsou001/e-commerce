@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { commerce } from './lib/commerce';
 import { Products, Navbar, Cart, Checkout } from './components';
 
+export const Context = createContext(null);
+
 function App() {
     const [products, setProducts] = useState([]);
-    const [cart, setCart] = useState({});
+    const [cart, setCart] = useState({}); 
     const [order, setOrder] = useState({});
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');       
     
     const fetchProducts = async () => {
         try {
@@ -62,23 +64,7 @@ function App() {
     const refreshCart = async () => {
         const newCart = await commerce.cart.refresh();
         setCart(newCart);
-    }
-
-    const handleStripeCaptureCheckout = async (checkoutTokenId, newOrder, paymentGateway) => {        
-        try {            
-            const incomingOrder = await commerce.checkout.capture(checkoutTokenId, {
-                ...newOrder, 
-                payment: { ...paymentGateway }
-            });
-            setOrder(incomingOrder);            
-
-            refreshCart();
-        } catch (error) {   
-            if (error.data.error.type === 'requires_verification') throw error;         
-            console.log(error);
-            setErrorMessage(error.data.error.message);                               
-        }
-    }
+    }    
     
     const handlePaypalCaptureCheckout = async (checkoutTokenId, newOrder, amount, moveToNextStep) => {
         const getPaypalPaymentId = async (orderDetails) => {
@@ -94,7 +80,7 @@ function App() {
                 });
                 renderPaypalButton(orderDetails, paypalAuth);
             } catch (e) {   
-                setErrorMessage(e.data.error.message);         
+                // setErrorMessage(e.data.error.message);         
                 console.log(e)
             }               
         } 
@@ -131,7 +117,7 @@ function App() {
                     },
                 }).render('#paypal-button');
             } catch (e) {
-                setErrorMessage(e.data.error.message);
+                // setErrorMessage(e.data.error.message);
                 console.log(e);
             }
         }        
@@ -149,9 +135,9 @@ function App() {
                         }
                     }
                 })            
-                setOrder(orderDetails);                
+                // setOrder(orderDetails);                
             } catch (e) {
-                setErrorMessage(e.data.error.message);
+                // setErrorMessage(e.data.error.message);
                 console.log(e);
             }        
             moveToNextStep();
@@ -161,9 +147,9 @@ function App() {
     
     
 
-    const handleResetError = () => {
-        setErrorMessage('');
-    }    
+    // const handleResetError = () => {
+    //     setErrorMessage('');
+    // }    
 
     const handleDeleteCart = async () => {
         try {
@@ -172,6 +158,14 @@ function App() {
         } catch (e) {
             console.log(e)
         }
+    }
+
+    const context = {
+        order,
+        errorMessage,
+        setOrder,
+        setErrorMessage,
+        refreshCart
     }
 
     useEffect(() => {
@@ -197,14 +191,12 @@ function App() {
                         />        
                     </Route>
                     <Route exact path='/checkout'>
-                        <Checkout
-                            cart={cart} 
-                            order={order}
-                            onStripeCaptureCheckout={handleStripeCaptureCheckout}
-                            onPaypalCaptureCheckout={handlePaypalCaptureCheckout}
-                            error={errorMessage}      
-                            onResetError={handleResetError}                      
-                        />
+                        <Context.Provider value={context}>
+                            <Checkout
+                                cart={cart}                                                         
+                                onPaypalCaptureCheckout={handlePaypalCaptureCheckout}                              
+                            />
+                        </Context.Provider>
                     </Route>
                 </Switch>
             </div> 

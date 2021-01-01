@@ -6,7 +6,7 @@ import Review from './Review';
 import ReactPaypal from './ReactPaypal/ReactPaypal';
 import ReactStripe from './ReactStripe/ReactStripe';
 
-function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeCaptureCheckout, onPaypalCaptureCheckout }) {       
+function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onSetOrder, onSetErrorMessage, onPaypalCaptureCheckout }) {       
     const [shippingInfo, setShippingInfo] = useState({});       
     const [paymentMethod, setPaymentMethod] = useState('');
 
@@ -47,7 +47,9 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeC
                        checkoutToken={checkoutToken}                
                        amount={(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
                        nextStep={nextStep}
-                       backStep={backStep} 
+                       backStep={backStep}
+                       onSetOrder={onSetOrder}
+                       onSetErrorMessage={onSetErrorMessage} 
                        {...props}
                    />
         }
@@ -61,7 +63,7 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onStripeC
         if (paymentMethod === 'paypal') {
             return <EnhancedPaypal onPaypalCaptureCheckout={onPaypalCaptureCheckout} />;            
         } else if (paymentMethod === 'bank card') {
-            return <EnhancedStripe onStripeCaptureCheckout={onStripeCaptureCheckout} />;
+            return <EnhancedStripe />;
         }
     }
 

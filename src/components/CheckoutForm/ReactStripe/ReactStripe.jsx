@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button } from '@material-ui/core';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { commerce } from '../../../lib/commerce';
+import { Context } from '../../../App';
 import { loadStripe } from '@stripe/stripe-js';
 import { AirlineSeatReclineExtraTwoTone } from '@material-ui/icons';
 
@@ -10,6 +12,8 @@ function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep, onS
     const Payment = () => {
         const stripe = useStripe();
         const elements = useElements();
+
+        const { setOrder, setErrorMessage, refreshCart } = useContext(Context);
 
         const handleSubmit = async (event, elements, stripe) => {
             event.preventDefault();
@@ -22,43 +26,58 @@ function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep, onS
                 const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
                 if (error) throw error;                                                   
                 
-                // try {            
-                    onStripeCaptureCheckout(checkoutToken.id, orderData, {
-                        gateway: 'stripe',
-                        payment_method_id: paymentMethod.id
-                    });             
-                    // if (response?.data?.error?.type !== 'requires_verification') {
-                        console.log('jjj');
-                        nextStep();
+                try {            
+                    const incomingOrder = await commerce.checkout.capture(checkoutToken.id, {
+                        ...orderData,
+                        payment: {
+                            gateway: 'stripe',
+                            stripe: {
+                                payment_method_id: paymentMethod.id
+                            }
+                        }
+                    });                                 
+                    setOrder(incomingOrder);
+                    refreshCart();
+                    return;                                                        
+                } catch (response) {   
+                    if (response.statusCode !== 402 || response.data.error.type !== 'requires_verification') {                        
+                        setErrorMessage(response.data.error.message);
                         return;
-                    // };
-                                                        
-                // } catch (response) {   
-                    // try {                
-                    //     console.log('hhh');
-                    //     const { error, paymentIntent } = await stripe.handleCardAction(response.data.error.param);
+                    }
+
+                    try {                                        
+                        const { error, paymentIntent } = await stripe.handleCardAction(response.data.error.param);
         
-                    //     if (error) throw error;                    
+                        if (error) throw error;                    
         
-                    //     try {
-                    //         onStripeCaptureCheckout(checkoutToken.id, orderData, {
-                    //             gateway: 'stripe',
-                    //             stripe: {
-                    //                 payment_intent_id: paymentIntent.id
-                    //             }
-                    //         });
-        
-                    //         nextStep();
-                    //     } catch (error) {
-                    //         console.log(error);                            
-                    //     }
-                    // } catch (error) {
-                    //     console.log(error);                
-                    // }               
-                // }
+                        try {
+                            const order = await commerce.checkout.capture(checkoutToken.id, {
+                                ...orderData,
+                                payment: {
+                                    gateway: 'stripe',
+                                    stripe: {
+                                        payment_intent_id: paymentIntent.id
+                                    }
+                                }
+                            });                            
+                            setOrder(order);
+                            refreshCart();
+                            return;
+                        } catch (error) {
+                            console.log(error);
+                            setErrorMessage(error.data.error.message);                            
+                        }
+                    } catch (error) {
+                        console.log(error); 
+                        setErrorMessage(error);               
+                    }               
+                }
             } catch (error) {
                 console.log(error)
-            }                                
+                setErrorMessage(error);
+            } finally {
+                nextStep();                
+            }                      
         }
 
         return (
