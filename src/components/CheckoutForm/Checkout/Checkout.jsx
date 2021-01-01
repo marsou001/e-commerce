@@ -7,7 +7,7 @@ import { commerce } from '../../../lib/commerce';
 import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
 
-function Checkout({ cart, onPaypalCaptureCheckout }) {
+function Checkout({ cart }) {
     const [activeStep, setActiveStep] = useState(0);
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [shippingData, setShippingData] = useState({});    
@@ -58,8 +58,7 @@ function Checkout({ cart, onPaypalCaptureCheckout }) {
                                                     shippingData={shippingData} 
                                                     checkoutToken={checkoutToken}
                                                     nextStep={nextStep} 
-                                                    backStep={backStep}                                                     
-                                                    onPaypalCaptureCheckout={onPaypalCaptureCheckout}                                                      
+                                                    backStep={backStep}                                                                                                                                                               
                                                 />                                                
                                             )
 

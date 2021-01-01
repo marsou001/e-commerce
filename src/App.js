@@ -64,101 +64,7 @@ function App() {
     const refreshCart = async () => {
         const newCart = await commerce.cart.refresh();
         setCart(newCart);
-    }    
-    
-    const handlePaypalCaptureCheckout = async (checkoutTokenId, newOrder, amount, moveToNextStep) => {
-        const getPaypalPaymentId = async (orderDetails) => {
-            try {
-                const paypalAuth = await commerce.checkout.capture(checkoutTokenId, {
-                    ...orderDetails,
-                    payment: {
-                        gateway: 'paypal',
-                        paypal: {
-                            action: 'authorize'
-                        }
-                    }
-                });
-                renderPaypalButton(orderDetails, paypalAuth);
-            } catch (e) {   
-                // setErrorMessage(e.data.error.message);         
-                console.log(e)
-            }               
-        } 
-    
-        const renderPaypalButton = (orderData, paypalAuth) => {
-            console.log(window.paypal);
-            try {
-                window.paypal.Buttons({
-                    env: 'sandbox',
-                    commit: true,
-                    createOrder: (data, actions) => {
-                        return actions.order.create({
-                            intent: "CAPTURE",
-                            purchase_units: [
-                                {
-                                    description: "Your description",
-                                    amount: {
-                                        currency_code: "USD",
-                                        value: amount,
-                                    },
-                                },
-                            ],
-                        });
-                    },                                
-                    onCancel: function(data, actions) {
-                        console.log('oops')                    
-                    },
-                    onApprove: async (data, actions) => {                    
-                        const order = await actions.order.capture();                    
-                        captureOrder(orderData, order, paypalAuth)                   
-                    },
-                    onError: (err) => {                  
-                        console.error(err);
-                    },
-                }).render('#paypal-button');
-            } catch (e) {
-                // setErrorMessage(e.data.error.message);
-                console.log(e);
-            }
-        }        
-    
-        const captureOrder = async (orderDetails, data, auth) => {
-            try {            
-                await commerce.checkout.capture(checkoutTokenId, {
-                    ...orderDetails,
-                    payment: {
-                        gateway: 'paypal',
-                        paypal: {
-                            action: 'capture',                        
-                            payment_id: auth.payment_id,
-                            payer_id: data.payer.payer_id
-                        }
-                    }
-                })            
-                // setOrder(orderDetails);                
-            } catch (e) {
-                // setErrorMessage(e.data.error.message);
-                console.log(e);
-            }        
-            moveToNextStep();
-        }
-        getPaypalPaymentId(newOrder);
-    }
-    
-    
-
-    // const handleResetError = () => {
-    //     setErrorMessage('');
-    // }    
-
-    const handleDeleteCart = async () => {
-        try {
-            const response = await commerce.cart.delete();
-            console.log(response);
-        } catch (e) {
-            console.log(e)
-        }
-    }
+    }                 
 
     const context = {
         order,
@@ -170,7 +76,6 @@ function App() {
 
     useEffect(() => {
         fetchProducts();
-        // handleDeleteCart();
         fetchCart();
     }, []);
 
@@ -193,8 +98,7 @@ function App() {
                     <Route exact path='/checkout'>
                         <Context.Provider value={context}>
                             <Checkout
-                                cart={cart}                                                         
-                                onPaypalCaptureCheckout={handlePaypalCaptureCheckout}                              
+                                cart={cart}                                                                                                                      
                             />
                         </Context.Provider>
                     </Route>

@@ -4,11 +4,10 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { commerce } from '../../../lib/commerce';
 import { Context } from '../../../App';
 import { loadStripe } from '@stripe/stripe-js';
-import { AirlineSeatReclineExtraTwoTone } from '@material-ui/icons';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
-function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep, onStripeCaptureCheckout }) {           
+function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep }) {           
     const Payment = () => {
         const stripe = useStripe();
         const elements = useElements();
@@ -40,7 +39,7 @@ function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep, onS
                     refreshCart();
                     return;                                                        
                 } catch (response) {   
-                    if (response.statusCode !== 402 || response.data.error.type !== 'requires_verification') {                        
+                    if (response.statusCode !== 402 || response.data.error.type !== 'requires_verification') {                                                
                         setErrorMessage(response.data.error.message);
                         return;
                     }
