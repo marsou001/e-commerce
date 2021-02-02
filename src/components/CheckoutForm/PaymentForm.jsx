@@ -77,7 +77,7 @@ function PaymentForm({ shippingData, checkoutToken, nextStep, backStep }) {
                 console.log(e);
             }
         })();
-    }, []);
+    }, [checkoutToken.id, shippingData.shippingCountry, shippingData.shippingOption, shippingData.shippingSubdivision]);
 
     if (!Object.keys(shippingInfo).length) return null;
     

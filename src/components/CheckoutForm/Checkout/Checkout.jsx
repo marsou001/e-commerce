@@ -73,7 +73,7 @@ function Checkout({ cart }) {
         }
 
         generateToken();
-    }, []);
+    }, [cart.id, history]);
 
     return (        
         <>
