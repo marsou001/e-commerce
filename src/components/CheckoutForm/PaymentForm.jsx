@@ -7,7 +7,7 @@ import Review from './Review';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY_TEST);
 
-function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCaptureCheckout, refresh }) {       
+function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCaptureCheckout }) {       
     const [shippingInfo, setShippingInfo] = useState({});
 
     const Payment = () => {
@@ -67,7 +67,6 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <Button variant='outlined' onClick={backStep}>Back</Button>
                     <Button type='submit' variant='contained' disabled={!stripe} color='primary'>
-                        {/* Pay {checkoutToken.live.subtotal.formatted_with_symbol} */}
                         Pay ${(checkoutToken.live.subtotal.raw + shippingInfo.price.raw).toFixed(2).toString()}
                     </Button>
                 </div>

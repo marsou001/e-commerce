@@ -77,20 +77,10 @@ function App() {
 
     const handleResetError = () => {
         setErrorMessage('');
-    }
-
-    // const handleDeleteCart = async () => {
-    //     try {
-    //         const response = await commerce.cart.delete();
-    //         console.log(response);
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    // }
+    }    
 
     useEffect(() => {
         fetchProducts();
-        // handleDeleteCart();
         fetchCart();
     }, []);
 
