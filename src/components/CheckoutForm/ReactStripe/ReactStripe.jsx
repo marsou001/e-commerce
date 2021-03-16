@@ -5,7 +5,7 @@ import { commerce } from '../../../lib/commerce';
 import { Context } from '../../../App';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY_TEST);
 
 function ReactStripe({ orderData, amount, checkoutToken, nextStep, backStep }) {           
     const Payment = () => {
