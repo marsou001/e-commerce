@@ -7,12 +7,11 @@ export default makeStyles((theme) => ({
     },
     emptyButton: {
         minWidth: '150px',
-        [theme.breakpoints.down('xs')]: {
         marginBottom: '5px',
-        },
-        [theme.breakpoints.up('xs')]: {
-        marginRight: '20px',
-        },
+        [theme.breakpoints.up('sm')]: {
+            marginBottom: '0',
+            marginRight: '20px',
+        },  
     },
     checkoutButton: {
         minWidth: '150px',
@@ -26,4 +25,11 @@ export default makeStyles((theme) => ({
         width: '100%',
         justifyContent: 'space-between',
     },
+    buttons: {
+        [theme.breakpoints.down('xs')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end'
+        }
+    }
 }));
