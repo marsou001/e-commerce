@@ -1,4 +1,4 @@
-This i an e-commerce project I made using React, Stripe API and [https://commercejs.com](commerce.js) library for handling the payments.
+This is an e-commerce project I made using React, Stripe API and [https://commercejs.com](commerce.js) library for handling the payments.
 
 I am using Stripe testing API key because Stripe is not available in my home country, and in order to get the live API, I have to provide some informations about my company, something which simply I don't have.
 
