@@ -87,7 +87,7 @@ function PaymentForm({shippingData, checkoutToken, nextStep, backStep, onCapture
                 console.log(e);
             }
         })();
-    }, []);
+    }, [checkoutToken.id, shippingData.shippingOption, shippingData.shippingCountry, shippingData.shippingSubdivision]);
 
     if (!Object.keys(shippingInfo).length) return null;
     
