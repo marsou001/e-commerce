@@ -1,3 +1,9 @@
+This i an e-commerce project I made using React, Stripe API and [https://commercejs.com](commerce.js) library for handling the payments.
+
+I am using Stripe testing API key because Stripe is not available in my home country, and in order to get the live API, I have to provide some informations about my company, something which simply I don't have.
+
+Type 4242 4242 4242 4242 in the bank card input field, and 04/24 in the expiration date, 242 in the CVC field, and 42424 in the postal code section.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
