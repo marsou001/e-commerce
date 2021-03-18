@@ -69,8 +69,7 @@ function Checkout({ cart, order, onCaptureCheckout, error, onResetError }) {
         }
 
         generateToken();
-    // }, [cart.id]);
-    }, []);
+    }, [cart.id, history]);
 
     return (        
         <>
