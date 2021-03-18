@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export default makeStyles(() => ({
+export default makeStyles((theme) => ({
     root: {
         maxWidth: '100%'
     },
@@ -14,6 +14,20 @@ export default makeStyles(() => ({
     },
     cardContent: {
         display: 'flex',
-        justifyContent: 'space-between',
+        [theme.breakpoints.up('xs')]: {
+            flexDirection: 'column'
+        },
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+        }
     },
+    productPrice: {
+        [theme.breakpoints.up('sm')]: {
+            fontSize: '1rem'
+        },
+        [theme.breakpoints.up('md')]: {
+            fontSize: '1.5rem'
+        }
+    }
 }));
